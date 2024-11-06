@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RightByte - User Info</title>
+    <style>
+        /* Basic reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Full page setup */
+        body, html {
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        /* Container layout covering full viewport */
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* Left profile section */
+        .left-section {
+            background-color: #800000;
+            color: #ffffff;
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            gap: 15px;
+        }
+        /*
+        .left-section .profile-icon {
+            background-color: #ddd;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+        }
+        */
+        .left-section .info-input {
+            background-color: #ffffff;
+            color: #555;
+            width: 80%;
+            height: 5%;
+            padding: 0 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 120%;
+            text-align: center;
+        }
+
+        /* Right form section */
+        .right-section {
+            background-color: #ffffff;
+            width: 75%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .dropdown, .weight-input {
+            width: 80%;
+            height: 5%;
+            max-width: 1000px;
+            padding: 10px;
+            font-size: 120%;
+            color: #555;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .dropdown {
+            background-color: #f9f9f9;
+        }
+
+        .weight-input {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Section with Editable Profile Info -->
+        <div class="left-section">
+            <div class="profile-icon"></div>
+            <input type="text" class="info-input" placeholder="Name" name="name">
+            <input type="number" class="info-input" placeholder="Age" name="age">
+            <select class="dropdown" name="gender">
+            <option disabled selected>Gender</option>
+                <option value="male">male</option>
+                <option value="female">female</option>
+                <option value="other">other</option>
+            </select>
+            <input type="text" class="info-input" placeholder="Height (in cm)" name="height">
+        </div>
+
+        <!-- Right Section with Form -->
+        <div class="right-section">
+            <!-- Dropdowns for Health Conditions -->
+            <select class="dropdown" name="disease1">
+                <option disabled selected>Health conditions (if any)</option>
+                {% for disease in diseases %}
+                    <option value="{{ disease }}">{{ disease }}</option>
+                {% endfor %}
+            </select>
+            <select class="dropdown" name="disease2">
+                <option disabled selected>Health conditions (if any)</option>
+                {% for disease in diseases %}
+                    <option value="{{ disease }}">{{ disease }}</option>
+                {% endfor %}
+            </select>
+
+            <!-- Weight Input -->
+            <input type="text" class="weight-input" placeholder="Weight (in kg)" name="weight">
+        </div>
+    </div>
+</body>
+</html>
