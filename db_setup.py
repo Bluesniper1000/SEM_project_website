@@ -4,12 +4,19 @@ def create_db():
     conn = sqlite3.connect('food_data.db')
     c = conn.cursor()
 
-    # Create users table for login functionality
+    # Create users table for login functionality, with additional fields
     c.execute('''
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        name TEXT,
+        gender TEXT CHECK(gender IN ('Male', 'Female', 'Other')),
+        age INTEGER CHECK(age > 0),
+        height REAL CHECK(height > 0),  -- height in cm or inches
+        weight REAL CHECK(weight > 0),  -- weight in kg or lbs
+        disease1 TEXT,
+        disease2 TEXT
     )''')
 
     # Create food suggestion table
@@ -20,9 +27,9 @@ def create_db():
         health_condition TEXT NOT NULL COLLATE NOCASE
     )''')
 
-    # Insert sample users
-    c.execute("INSERT OR IGNORE INTO users (username, password) VALUES ('admin', 'admin123')")
-    c.execute("INSERT OR IGNORE INTO users (username, password) VALUES ('user', 'user123')")
+    # Insert sample users with new fields
+    c.execute("INSERT OR IGNORE INTO users (username, password, name, gender, age, height, weight, disease1, disease2) VALUES ('admin', 'admin123', 'Admin User', 'Male', 35, 175, 70, 'Hypertension', 'None')")
+    c.execute("INSERT OR IGNORE INTO users (username, password, name, gender, age, height, weight, disease1, disease2) VALUES ('user', 'user123', 'Regular User', 'Female', 28, 160, 55, 'Diabetes', 'Asthma')")
 
     # Extensive list of food suggestions for various health conditions
     foods = [

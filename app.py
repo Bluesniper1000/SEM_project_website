@@ -61,8 +61,48 @@ def signup():
     
     return render_template('signup.html')
 
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    # Fetch user data
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    diseases = conn.execute('SELECT DISTINCT health_condition FROM food_suggestions').fetchall()
+    conn.close()
+
+    return render_template('profile.html', user=user, diseases=[d['health_condition'] for d in diseases])
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    # Get the form data
+    name = request.form.get('name')
+    age = request.form.get('age')
+    gender = request.form.get('gender')
+    height = request.form.get('height')
+    disease1 = request.form.get('disease1')
+    disease2 = request.form.get('disease2')
+    weight = request.form.get('weight')
+
+    # Update the user's profile in the database
+    conn = get_db_connection()
+    conn.execute('''
+        UPDATE users
+        SET name = ?, age = ?, gender = ?, height = ?, weight = ?, disease1 = ?, disease2 = ?
+        WHERE id = ?
+    ''', (name, age, gender, height, weight, disease1, disease2, session['user_id']))
+    conn.commit()
+    conn.close()
+
+    # Redirect back to profile page with updated data
+    return redirect(url_for('profile'))
+
 # Route for logout functionality
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('login'))
