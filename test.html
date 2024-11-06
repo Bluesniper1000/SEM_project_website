@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RightByte - Home</title>
+    <style>
+        /* Reset and basic styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #800000;
+            color: white;
+        }
+
+        /* Container for the layout */
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 1200px;
+            border: 2px solid #800000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Left section with slogan */
+        .left-section {
+            background-color: #800000;
+            color: white;
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Right section with branding and login form */
+        .right-section {
+            background-color: #ffffff;
+            color: #800000;
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .login-container p {
+            margin-bottom: 10px;
+            color: #800000;
+            font-size: 1.2rem;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            background-color: #800000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .login-container button:hover {
+            background-color: #660000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Section -->
+        <div class="left-section">
+            Eat Right, Live Strong
+        </div>
+
+        <!-- Right Section -->
+        <div class="right-section">
+            <div class="brand">RIGHTBYTE</div>
+            <div class="login-container">
+                <p>Login to continue</p>
+                <input type="text" placeholder="Username" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
