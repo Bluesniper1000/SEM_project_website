@@ -6,122 +6,19 @@
     <title>RightByte - User Profile</title>
     <style>
         /* Basic reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* Full page setup */
-        body, html {
-            height: 100%;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
-
-        /* Header for Home and Logout buttons */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            padding: 10px;
-            background-color: #e0e0e0
-        }
-
-        .header button {
-            background-color: #e0e0e0;
-            color: #800000;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .header button:hover {
-            color: #ccc;
-            background-color: #640202;
-        }
-
-        /* Container layout covering full viewport */
-        .container {
-            display: flex;
-            width: 100%;
-            height: calc(100vh - 60px); /* Adjust height to account for header */
-        }
-
-        /* Left profile section */
-        .left-section {
-            background-color: #800000;
-            color: #ffffff;
-            width: 45%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            gap: 15px;
-        }
-
-        .left-section .info-input {
-            background-color: #ffffff;
-            color: #555;
-            width: 80%;
-            height: 5%;
-            padding: 0 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 120%;
-            text-align: center;
-        }
-
-        /* Right form section */
-        .right-section {
-            background-color: #ffffff;
-            width: 75%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            padding: 30px;
-        }
-
-        .dropdown, .weight-input {
-            width: 80%;
-            height: 5%;
-            max-width: 1000px;
-            padding: 10px;
-            font-size: 120%;
-            color: #555;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .dropdown {
-            background-color: #f9f9f9;
-        }
-
-        .weight-input {
-            background-color: #ffffff;
-        }
-        .submit_button {
-            background-color: #800000;
-            color: #ffffff;
-            font-size: 16px;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .submit_button:hover {
-            background-color: #640202;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { height: 100%; font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        .header { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px; background-color: #e0e0e0; }
+        .header button { background-color: #e0e0e0; color: #800000; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; }
+        .container { display: flex; width: 100%; height: calc(100vh - 60px); }
+        .left-section { background-color: #800000; color: #ffffff; width: 45%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; gap: 15px; }
+        .right-section { background-color: #ffffff; width: 75%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 30px; }
+        .dropdown, .weight-input, .info-input { width: 80%; max-width: 1000px; padding: 10px; font-size: 120%; color: #555; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+        .submit_button { background-color: #800000; color: #ffffff; font-size: 16px; padding: 10px 20px; border: none; cursor: pointer; border-radius: 4px; }
+        .submit_button:hover { background-color: #640202; }
     </style>
 </head>
 <body>
-    <!-- Header with Home and Logout buttons -->
     <div class="header">
         <form action="/" method="get" style="margin: 0;">
             <button type="submit">Home</button>
@@ -132,42 +29,64 @@
     </div>
 
     <div class="container">
-        <!-- Left Section with Editable Profile Info -->
         <div class="left-section">
-            <div class="profile-icon"></div>
-            <input type="text" class="info-input" placeholder="Name" name="name">
-            <input type="number" class="info-input" placeholder="Age" name="age">
-            <select class="dropdown" name="gender">
+            <input type="text" class="info-input" placeholder="Name" name="name" id="name">
+            <input type="number" class="info-input" placeholder="Age" name="age" id="age">
+            <select class="dropdown" name="gender" id="gender">
                 <option disabled selected>Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
             </select>
-            <input type="text" class="info-input" placeholder="Height (in cm)" name="height">
+            <input type="text" class="info-input" placeholder="Height (in cm)" name="height" id="height">
         </div>
 
-        <!-- Right Section with Form -->
         <div class="right-section">
-            <!-- Dropdowns for Health Conditions -->
-            <select class="dropdown" name="disease1">
+            <select class="dropdown" name="disease1" id="disease1">
                 <option disabled selected>Health conditions (if any)</option>
                 {% for disease in diseases %}
                     <option value="{{ disease }}">{{ disease }}</option>
                 {% endfor %}
             </select>
-            <select class="dropdown" name="disease2">
+            <select class="dropdown" name="disease2" id="disease2">
                 <option disabled selected>Health conditions (if any)</option>
                 {% for disease in diseases %}
                     <option value="{{ disease }}">{{ disease }}</option>
                 {% endfor %}
             </select>
-
-            <!-- Weight Input -->
-            <input type="text" class="weight-input" placeholder="Weight (in kg)" name="weight">
-            <form action="/update_profile" method="post" >
-                <button type="submit_button">Submit</button>
-            </form>
+            <input type="text" class="weight-input" placeholder="Weight (in kg)" name="weight" id="weight">
+            <button type="button" class="submit_button" onclick="updateProfile()">Submit</button>
+            <p id="message"></p>
         </div>
     </div>
+
+    <script>
+        function updateProfile() {
+            const data = {
+                name: document.getElementById("name").value,
+                age: document.getElementById("age").value,
+                gender: document.getElementById("gender").value,
+                height: document.getElementById("height").value,
+                weight: document.getElementById("weight").value,
+                disease1: document.getElementById("disease1").value,
+                disease2: document.getElementById("disease2").value
+            };
+
+            fetch('/update_profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("message").textContent = data.message;
+            })
+            .catch(error => {
+                document.getElementById("message").textContent = "An error occurred.";
+            });
+        }
+    </script>
 </body>
 </html>
