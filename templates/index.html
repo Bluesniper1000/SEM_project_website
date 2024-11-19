@@ -15,13 +15,11 @@
             height: 100%;
             font-family: Arial, sans-serif;
         }
-
         .container {
             display: flex;
             width: 100%;
             height: 100vh;
         }
-
         /* Left section with slogan */
         .left-section {
             background-color: #800000;
@@ -32,13 +30,11 @@
             justify-content: center;
             padding: 20px;
         }
-
         .left-section h1 {
-            font-size: 8rem;
+            font-size: 4rem;
             line-height: 1.2;
             text-align: left;
         }
-
         /* Right section with branding and search bar */
         .right-section {
             background-color: #ffffff;
@@ -51,105 +47,95 @@
             position: relative;
             padding: 20px;
         }
-
         .brand {
-            font-size: 5rem;
-            letter-spacing: 0.8rem;
+            font-size: 3rem;
+            letter-spacing: 0.5rem;
             font-weight: bold;
             margin-bottom: 50px;
         }
-
         .search-container {
             width: 100%;
             max-width: 35rem;
             text-align: left;
         }
-
         .search-container p {
             margin-bottom: 10px;
             color: #800000;
             font-size: 1.5rem;
         }
-
         .search-bar {
             width: 100%;
             padding: 10px;
             font-size: 1rem;
             border: 1px solid #9b9b9b;
             border-radius: 4px;
+            margin-bottom: 20px;
         }
-
-        /* Profile icon styling */
-        .profile-button {
+        /* Profile and logout links */
+        .nav-links {
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 50px;
-            height: 50px;
-            background-color: #800000;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.5rem;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s ease, background-color 0.3s ease;
         }
-
-        .profile-button:hover {
-            background-color: #600000;
-            transform: scale(1.1);
+        .nav-links a {
+            color: #800000;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 10px;
         }
-
-        /* Results Section */
-        .results-container {
-            margin-top: 30px;
-            text-align: center;
+        /* Results styling */
+        .results {
+            margin-top: 20px;
+            color: #800000;
         }
-
-        .result-item {
-            background-color: #f4f4f4;
-            padding: 10px;
-            margin: 5px;
-            border-radius: 4px;
+        .results h3 {
+            margin-bottom: 10px;
+        }
+        .results ul {
+            list-style-type: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Left Section -->
-        <div class="left-section">
-            <h1>Eat<br>Right,<br>Live<br>Strong</h1>
-        </div>
 
-        <!-- Right Section -->
-        <div class="right-section">
-            <!-- Profile Button -->
-            <div class="profile-button" onclick="window.location.href='/profile'">P</div>
-
-            <!-- Brand and Search -->
-            <div class="brand">RIGHTBYTE</div>
-            <div class="search-container">
-                <form action="/search" method="POST">
-                    <p>Tell me what is in -</p>
-                    <input type="text" class="search-bar" name="search_term" placeholder="Search health condition..." required>
-                </form>
-            </div>
-
-            <!-- Display search results -->
-            {% if results %}
-            <div class="results-container">
-                <h3>Food Suggestions:</h3>
-                {% for food in results %}
-                    <div class="result-item">
-                        <strong>{{ food.food_name }}</strong> for {{ food.health_condition }}
-                    </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
+<div class="container">
+    <!-- Left section with slogan -->
+    <div class="left-section">
+        <h1>Eat Right<br>Live Strong</h1>
     </div>
+
+    <!-- Right section with branding, search, and profile/logout links -->
+    <div class="right-section">
+        <div class="nav-links">
+            <a href="{{ url_for('profile') }}">Profile</a> |
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+        <div class="brand">RIGHTBYTE</div>
+
+        <!-- Search form for food suggestions -->
+        <div class="search-container">
+            <p>Search Food For:</p>
+            <form action="{{ url_for('search') }}" method="POST">
+                <input type="text" class="search-bar" id="search_term" name="search_term" placeholder="e.g., Anemia, Heart health">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <!-- Search results section -->
+        {% if results %}
+        <div class="results">
+            <h3>Food Suggestions for "{{ request.form['search_term'] }}"</h3>
+            <ul>
+                {% for item in results %}
+                    <li>{{ item['food_name'] }} - Recommended for {{ item['health_condition'] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
 </body>
 </html>
+
