@@ -10,14 +10,14 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row  # To get dictionary-like rows
     return conn
 
-# Route for home page
+# Index route with conditional login redirect
 @app.route('/')
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('index.html')
 
-# Route for login page
+# Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -25,20 +25,18 @@ def login():
         password = request.form['password']
         
         conn = get_db_connection()
-        user = conn.execute(
-            'SELECT * FROM users WHERE username = ? AND password = ?', (username, password)
-        ).fetchone()
+        user = conn.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password)).fetchone()
         conn.close()
         
         if user:
-            session['user_id'] = user['id']
-            return redirect(url_for('index'))
+            session['user_id'] = user['id']  # Store user ID in session
+            return redirect(url_for('index'))  # Redirect to homepage after login
         else:
             return 'Invalid credentials, try again!'
     
     return render_template('login.html')
 
-# Route for signup page
+# Signup route
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -46,87 +44,76 @@ def signup():
         password = request.form['password']
         
         conn = get_db_connection()
-        existing_user = conn.execute(
-            'SELECT * FROM users WHERE username = ?', (username,)
-        ).fetchone()
+        existing_user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
         
         if existing_user:
-            conn.close()
             return 'Username already exists, please choose another one.'
         
         conn.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
         conn.commit()
         conn.close()
         
-        return redirect(url_for('login'))
+        return redirect(url_for('login'))  # Redirect to login page after successful signup
     
     return render_template('signup.html')
 
-# Route to view and update profile
+# Profile creation and update route
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
+
     conn = get_db_connection()
-    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    diseases = conn.execute('SELECT DISTINCT health_condition FROM food_suggestions').fetchall()
-    
+    user_id = session['user_id']
+
     if request.method == 'POST':
-        # Update profile
-        name = request.form.get('name')
-        age = request.form.get('age')
-        gender = request.form.get('gender')
-        height = request.form.get('height')
-        weight = request.form.get('weight')
-        disease1 = request.form.get('disease1')
-        disease2 = request.form.get('disease2')
-
-        if not name or not age or not gender:
-            conn.close()
-            return "Required fields are missing!", 400
-
-        conn.execute('''
-            UPDATE users
-            SET name = ?, age = ?, gender = ?, height = ?, weight = ?, disease1 = ?, disease2 = ?
-            WHERE id = ?
-        ''', (name, age, gender, height, weight, disease1, disease2, session['user_id']))
-
+        name = request.form['name']
+        sex = request.form['sex']
+        age = request.form['age']
+        height = request.form['height']
+        weight = request.form['weight']
+        
+        conn.execute(''' 
+            INSERT OR REPLACE INTO profiles (user_id, name, sex, age, height, weight)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (user_id, name, sex, age, height, weight))
         conn.commit()
-    
+
+    profile_data = conn.execute('SELECT * FROM profiles WHERE user_id = ?', (user_id,)).fetchone()
     conn.close()
-    return render_template('profile.html', user=user, diseases=[d['health_condition'] for d in diseases])
 
-# Route for logout functionality
-@app.route('/logout', methods=['POST'])
+    return render_template('profile.html', profile=profile_data)
+
+# Combined logout route
+@app.route('/logout', methods=['GET', 'POST'])
 def logout():
-    session.pop('user_id', None)
-    return redirect(url_for('login'))
+    session.clear()  # Clears the session data
+    return redirect(url_for('login'))  # Redirects to the login page after logout
 
-# Route to provide health condition suggestions for autocomplete
+# Search suggestions route
 @app.route('/search_suggestions', methods=['GET'])
 def search_suggestions():
-    query = request.args.get('query', '').strip().lower()
+    query = request.args.get('query', '')
     if len(query) < 3:
-        return jsonify([])
+        return jsonify([])  # No suggestions if query is too short
 
     conn = get_db_connection()
     health_conditions = conn.execute(
-        'SELECT DISTINCT health_condition FROM food_suggestions WHERE LOWER(health_condition) LIKE ?', ('%' + query + '%',)
+        'SELECT DISTINCT health_condition FROM food_suggestions WHERE health_condition LIKE ?', ('%' + query + '%',)
     ).fetchall()
     conn.close()
 
     suggestions = [{"health_condition": hc["health_condition"]} for hc in health_conditions]
     return jsonify(suggestions)
 
-# Route to search for food suggestions based on a health condition
+# Main search route for food suggestions
 @app.route('/search', methods=['POST'])
 def search():
-    query = request.form['search_term'].strip().lower()
+    query = request.form['search_term']
 
     conn = get_db_connection()
     food_suggestions = conn.execute(
-        'SELECT food_name, health_condition FROM food_suggestions WHERE LOWER(health_condition) LIKE ?', ('%' + query + '%',)
+        'SELECT food_name, health_condition FROM food_suggestions WHERE health_condition LIKE ?', ('%' + query + '%',)
     ).fetchall()
     conn.close()
 
