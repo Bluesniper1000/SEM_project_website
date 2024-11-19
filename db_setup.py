@@ -1,150 +1,124 @@
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import sqlite3
 
-def create_db():
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# Database connection function
+def get_db_connection():
     conn = sqlite3.connect('food_data.db')
-    c = conn.cursor()
+    conn.row_factory = sqlite3.Row  # To get dictionary-like rows
+    return conn
 
-    # Create users table for login functionality, with additional fields
-    c.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL,
-        name TEXT,
-        gender TEXT CHECK(gender IN ('Male', 'Female', 'Other')),
-        age INTEGER CHECK(age > 0),
-        height REAL CHECK(height > 0),  -- height in cm or inches
-        weight REAL CHECK(weight > 0),  -- weight in kg or lbs
-        disease1 TEXT,
-        disease2 TEXT
-    )''')
+# Index route with conditional login redirect
+@app.route('/')
+def index():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('index.html')
 
-    # Create food suggestion table
-    c.execute('''
-    CREATE TABLE IF NOT EXISTS food_suggestions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        food_name TEXT NOT NULL COLLATE NOCASE,
-        health_condition TEXT NOT NULL COLLATE NOCASE
-    )''')
+# Login route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        conn = get_db_connection()
+        user = conn.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password)).fetchone()
+        conn.close()
+        
+        if user:
+            session['user_id'] = user['id']  # Store user ID in session
+            return redirect(url_for('index'))  # Redirect to homepage after login
+        else:
+            return 'Invalid credentials, try again!'
+    
+    return render_template('login.html')
 
-    # Insert sample users with new fields
-    c.execute("INSERT OR IGNORE INTO users (username, password, name, gender, age, height, weight, disease1, disease2) VALUES ('admin', 'admin123', 'Admin User', 'Male', 35, 175, 70, 'Hypertension', 'None')")
-    c.execute("INSERT OR IGNORE INTO users (username, password, name, gender, age, height, weight, disease1, disease2) VALUES ('user', 'user123', 'Regular User', 'Female', 28, 160, 55, 'Diabetes', 'Asthma')")
+# Signup route
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        conn = get_db_connection()
+        existing_user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        
+        if existing_user:
+            return 'Username already exists, please choose another one.'
+        
+        conn.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+        conn.commit()
+        conn.close()
+        
+        return redirect(url_for('login'))  # Redirect to login page after successful signup
+    
+    return render_template('signup.html')
 
-    # Extensive list of food suggestions for various health conditions
-    foods = [
-        ('Carrot', 'Vision problems'),
-        ('Spinach', 'Anemia'),
-        ('Banana', 'Fatigue'),
-        ('Apple', 'Digestive issues'),
-        ('Salmon', 'Heart disease'),
-        ('Tomato', 'Cancer prevention'),
-        ('Olive oil', 'Inflammation'),
-        ('Garlic', 'High blood pressure'),
-        ('Ginger', 'Nausea'),
-        ('Yogurt', 'Gut health'),
-        ('Oats', 'High cholesterol'),
-        ('Chia seeds', 'Heart health'),
-        ('Avocado', 'Weight loss'),
-        ('Blueberries', 'Memory enhancement'),
-        ('Sweet potato', 'Diabetes'),
-        ('Almonds', 'Muscle recovery'),
-        ('Mango', 'Immune boosting'),
-        ('Kiwi', 'Asthma'),
-        ('Cucumber', 'Hydration'),
-        ('Kale', 'Cancer prevention'),
-        ('Lemon', 'Detoxification'),
-        ('Watermelon', 'Hydration and vitamin C'),
-        ('Turmeric', 'Joint health'),
-        ('Beetroot', 'Blood pressure regulation'),
-        ('Green tea', 'Metabolism boosting'),
-        ('Coconut water', 'Hydration'),
-        ('Pumpkin seeds', 'Prostate health'),
-        ('Eggplant', 'Blood sugar regulation'),
-        ('Cabbage', 'Cancer prevention'),
-        ('Lentils', 'Iron deficiency'),
-        ('Cherries', 'Anti-inflammatory'),
-        ('Pineapple', 'Digestive health'),
-        ('Chia seeds', 'Omega-3 fatty acids'),
-        ('Brussels sprouts', 'Antioxidants'),
-        ('Peppermint', 'Digestive issues'),
-        ('Cilantro', 'Heavy metal detox'),
-        ('Pomegranate', 'Heart health'),
-        ('Coconut oil', 'Brain function'),
-        ('Papaya', 'Stomach ulcers'),
-        ('Grapefruit', 'Weight loss'),
-        ('Asparagus', 'Antioxidants'),
-        ('Mushrooms', 'Immune system support'),
-        ('Zucchini', 'Digestive health'),
-        ('Figs', 'Bone health'),
-        ('Blackberries', 'Antioxidants'),
-        ('Walnuts', 'Brain health'),
-        ('Pistachios', 'Lowering cholesterol'),
-        ('Chickpeas', 'Diabetes'),
-        ('Cranberries', 'Urinary tract health'),
-        ('Bell peppers', 'Vitamin C boost'),
-        ('Broccoli', 'Cancer prevention'),
-        ('Basil', 'Antimicrobial support'),
-        ('Seaweed', 'Thyroid health'),
-        ('Quinoa', 'Protein deficiency'),
-        ('Brown rice', 'Diabetes management'),
-        ('Honey', 'Cough relief'),
-        ('Flaxseed', 'Heart health'),
-        ('Soy', 'Hormone balance'),
-        ('Milk', 'Bone health'),
-        ('Orange', 'Immune support'),
-        ('Parsley', 'Detoxification'),
-        ('Grapes', 'Heart health'),
-        ('Peanut butter', 'Muscle gain'),
-        ('Turmeric', 'Anti-inflammatory'),
-        ('Apricots', 'Skin health'),
-        ('Eggs', 'Protein boost'),
-        ('Sesame seeds', 'Joint health'),
-        ('Cloves', 'Anti-bacterial support'),
-        ('Tuna', 'Omega-3s for heart health'),
-        ('Cod liver oil', 'Vitamin D deficiency'),
-        ('Berries', 'Brain function'),
-        ('Sunflower seeds', 'Skin health'),
-        ('Lamb', 'Anemia'),
-        ('Chicken', 'Protein support'),
-        ('Cinnamon', 'Blood sugar control'),
-        ('Hemp seeds', 'Omega-3 and -6 balance'),
-        ('Black beans', 'High fiber'),
-        ('Green peas', 'Weight management'),
-        ('Pecans', 'Skin health'),
-        ('Macadamia nuts', 'Heart health'),
-        ('Goji berries', 'Energy boost'),
-        ('Rosemary', 'Memory enhancement'),
-        ('Watercress', 'Cancer protection'),
-        ('Turnips', 'Immune support'),
-        ('Radishes', 'Liver health'),
-        ('Mint', 'Digestive aid'),
-        ('Bay leaves', 'Blood sugar management'),
-        ('Sweet corn', 'Eye health'),
-        ('Jackfruit', 'Antioxidants for immune system'),
-        ('Fennel', 'Digestive health'),
-        ('Anise', 'Respiratory support'),
-        ('Artichokes', 'Liver function support'),
-        ('Chard', 'Bone health'),
-        ('Cauliflower', 'Heart health'),
-        ('Leeks', 'Gut health'),
-        ('Raspberries', 'Brain support'),
-        ('Plums', 'Constipation relief'),
-        ('Soy milk', 'Hormone regulation'),
-        ('Barley', 'Cholesterol control'),
-        ('Dates', 'Energy boost'),
-        ('Mulberries', 'Liver support'),
-        ('Pear', 'Colon health'),
-        ('Okra', 'Blood sugar support'),
-        ('Mustard greens', 'Detoxification')
-    ]
+# Profile creation and update route
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
 
-    # Insert the food suggestions into the database
-    c.executemany('INSERT OR IGNORE INTO food_suggestions (food_name, health_condition) VALUES (?, ?)', foods)
+    conn = get_db_connection()
+    user_id = session['user_id']
 
-    conn.commit()
+    if request.method == 'POST':
+        name = request.form['name']
+        sex = request.form['sex']
+        age = request.form['age']
+        height = request.form['height']
+        weight = request.form['weight']
+        
+        conn.execute(''' 
+            INSERT OR REPLACE INTO profiles (user_id, name, sex, age, height, weight)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (user_id, name, sex, age, height, weight))
+        conn.commit()
+
+    profile_data = conn.execute('SELECT * FROM profiles WHERE user_id = ?', (user_id,)).fetchone()
     conn.close()
 
-if __name__ == "__main__":
-    create_db()
-    print("Database setup complete with extensive food suggestions.")
+    return render_template('profile.html', profile=profile_data)
+
+# Combined logout route
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    session.clear()  # Clears the session data
+    return redirect(url_for('login'))  # Redirects to the login page after logout
+
+# Search suggestions route
+@app.route('/search_suggestions', methods=['GET'])
+def search_suggestions():
+    query = request.args.get('query', '')
+    if len(query) < 3:
+        return jsonify([])  # No suggestions if query is too short
+
+    conn = get_db_connection()
+    health_conditions = conn.execute(
+        'SELECT DISTINCT health_condition FROM food_suggestions WHERE health_condition LIKE ?', ('%' + query + '%',)
+    ).fetchall()
+    conn.close()
+
+    suggestions = [{"health_condition": hc["health_condition"]} for hc in health_conditions]
+    return jsonify(suggestions)
+
+# Main search route for food suggestions
+@app.route('/search', methods=['POST'])
+def search():
+    query = request.form['search_term']
+
+    conn = get_db_connection()
+    food_suggestions = conn.execute(
+        'SELECT food_name, health_condition FROM food_suggestions WHERE health_condition LIKE ?', ('%' + query + '%',)
+    ).fetchall()
+    conn.close()
+
+    return render_template('index.html', results=food_suggestions)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
